@@ -26,9 +26,7 @@ export function AuthForm() {
     reset()
 
     if (mode === 'forgot') {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://gc-camisetas.vercel.app/reset-password',
-      })
+      const { error } = await supabase.auth.resetPasswordForEmail(email)
       if (error) setError(error.message)
       else setMessage('Link enviado. Verifique seu email.')
       setLoading(false)
