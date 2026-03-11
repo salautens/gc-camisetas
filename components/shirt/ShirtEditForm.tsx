@@ -51,40 +51,37 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
 
     setLoading(false)
     if (error) { setError(error.message); return }
-    router.push(`/shirt/${shirt.id}`)
+    router.push('/gallery')
     router.refresh()
   }
 
-  const checkerStyle = {
-    backgroundImage: 'linear-gradient(45deg,#1a1a1a 25%,transparent 25%),linear-gradient(-45deg,#1a1a1a 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1a1a 75%),linear-gradient(-45deg,transparent 75%,#1a1a1a 75%)',
-    backgroundSize: '20px 20px',
-    backgroundPosition: '0 0,0 10px,10px -10px,-10px 0px',
-  }
-
   return (
-    <div className="max-w-xl">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[#F2EDE8]">Editar camiseta</h1>
+    <div className="min-h-screen px-10 pt-32 pb-20 max-w-lg">
+      <div className="flex items-center justify-between mb-2">
+        <p className="font-mono text-[0.6rem] tracking-[0.35em] uppercase text-[#888]">Editar</p>
         <button
           onClick={() => router.back()}
-          className="text-sm text-[#7A7570] hover:text-[#F2EDE8] transition-colors"
+          className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
         >
           Cancelar
         </button>
       </div>
+      <h1 className="font-display font-light text-[clamp(2rem,5vw,4rem)] leading-[0.9] tracking-[-0.02em] text-[#1a1a1a] mb-12">
+        {shirt.clube}
+      </h1>
 
-      {/* Current image + change option */}
-      <div className="mb-8">
+      {/* Photo */}
+      <div className="mb-10">
         <Label>Foto</Label>
         {currentImageUrl && !showImageEditor ? (
-          <div className="rounded-xl overflow-hidden border border-[#2A2520]">
-            <div className="relative h-48" style={shirt.processed_url ? checkerStyle : { backgroundColor: '#141210' }}>
-              <Image src={currentImageUrl} alt={shirt.clube} fill className="object-contain p-3" />
+          <div className="border border-[#e0e0e0]">
+            <div className="relative aspect-square bg-[#f1f1f1]">
+              <Image src={currentImageUrl} alt={shirt.clube} fill className="object-contain p-6" />
             </div>
-            <div className="p-3 flex gap-3 border-t border-[#2A2520]">
+            <div className="p-3 border-t border-[#e0e0e0]">
               <button
                 onClick={() => setShowImageEditor(true)}
-                className="text-xs text-[#3DFF6E] hover:underline"
+                className="font-mono text-[0.6rem] tracking-[0.15em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
               >
                 Trocar foto
               </button>
@@ -93,19 +90,19 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
         ) : !showImageEditor ? (
           <button
             onClick={() => setShowImageEditor(true)}
-            className="w-full border-2 border-dashed border-[#2A2520] rounded-xl p-6 text-sm text-[#7A7570] hover:border-[#7A7570] transition-colors"
+            className="w-full border border-dashed border-[#e0e0e0] p-8 font-mono text-[0.65rem] tracking-[0.2em] uppercase text-[#888] hover:border-[#1a1a1a] transition-colors cursor-pointer"
           >
             + Adicionar foto
           </button>
         ) : null}
 
         {showImageEditor && (
-          <div className="border border-[#2A2520] rounded-xl p-4">
+          <div className="border border-[#e0e0e0] p-6">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-[#F2EDE8] font-medium">Nova foto</span>
+              <span className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#1a1a1a]">Nova foto</span>
               <button
                 onClick={() => setShowImageEditor(false)}
-                className="text-xs text-[#7A7570] hover:text-[#F2EDE8] transition-colors"
+                className="font-mono text-[0.6rem] tracking-[0.1em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -122,9 +119,8 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
         )}
       </div>
 
-      {/* Fields */}
-      <form onSubmit={handleSave} className="space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSave} className="space-y-8">
+        <div className="grid grid-cols-2 gap-8">
           <div>
             <Label htmlFor="clube">Clube *</Label>
             <Input id="clube" value={clube} onChange={(e) => setClube(e.target.value)} required />
@@ -135,7 +131,7 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-8">
           <div>
             <Label htmlFor="versao">Versão</Label>
             <Select id="versao" value={versao} onChange={(e) => setVersao(e.target.value as Shirt['versao'])}>
@@ -155,11 +151,11 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
         <div>
           <Label htmlFor="condicao">Condição</Label>
           <Select id="condicao" value={condicao || ''} onChange={(e) => setCondicao(e.target.value as Shirt['condicao'] || null)}>
-            <option value="">Não informado</option>
-            <option value="mint">Mint — perfeita</option>
-            <option value="excellent">Excellent — excelente</option>
-            <option value="good">Good — boa</option>
-            <option value="worn">Worn — usada</option>
+            <option value="">—</option>
+            <option value="mint">Mint</option>
+            <option value="excellent">Excellent</option>
+            <option value="good">Good</option>
+            <option value="worn">Worn</option>
           </Select>
         </div>
 
@@ -169,10 +165,10 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
         </div>
 
         {error && (
-          <p className="text-red-400 text-sm bg-red-400/10 rounded-lg px-3 py-2">{error}</p>
+          <p className="font-mono text-[0.65rem] text-red-500 border border-red-200 px-3 py-2">{error}</p>
         )}
 
-        <Button type="submit" loading={loading} className="w-full">
+        <Button type="submit" loading={loading}>
           Salvar alterações
         </Button>
       </form>

@@ -4,7 +4,6 @@ import { useState, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
 import { ImageCropper } from './ImageCropper'
 
@@ -60,7 +59,6 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
       return
     }
 
-    // Poll for processed_url
     pollRef.current = setInterval(async () => {
       const { data } = await supabase
         .from('shirts')
@@ -71,7 +69,7 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
       if (data?.processing_status === 'done' && data.processed_url) {
         clearInterval(pollRef.current!)
         setProcessedUrl(data.processed_url)
-        setStatus('cropping') // Go to crop step instead of done
+        setStatus('cropping')
       } else if (data?.processing_status === 'failed') {
         clearInterval(pollRef.current!)
         setError('Falha ao processar imagem')
@@ -100,7 +98,7 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
     setFinalUrl(publicUrl)
     setStatus('done')
     onProcessed?.(publicUrl)
-    if (redirectTo) setTimeout(() => router.push(redirectTo), 1200)
+    if (redirectTo) setTimeout(() => router.push(redirectTo), 1000)
   }, [shirtId, userId, supabase, onProcessed, redirectTo, router])
 
   const handleSkipCrop = useCallback(() => {
@@ -108,7 +106,7 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
     setFinalUrl(processedUrl)
     setStatus('done')
     onProcessed?.(processedUrl)
-    if (redirectTo) setTimeout(() => router.push(redirectTo), 1200)
+    if (redirectTo) setTimeout(() => router.push(redirectTo), 1000)
   }, [processedUrl, onProcessed, redirectTo, router])
 
   function handleDrop(e: React.DragEvent) {
@@ -117,19 +115,8 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
     if (file) handleFile(file)
   }
 
-  const checkerStyle = {
-    backgroundImage: 'linear-gradient(45deg,#1a1a1a 25%,transparent 25%),linear-gradient(-45deg,#1a1a1a 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1a1a 75%),linear-gradient(-45deg,transparent 75%,#1a1a1a 75%)',
-    backgroundSize: '20px 20px',
-    backgroundPosition: '0 0,0 10px,10px -10px,-10px 0px',
-  }
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-[#3DFF6E] text-xs font-bold uppercase tracking-widest">Kit Lens</span>
-        <span className="text-[#7A7570] text-xs">— remoção de fundo automática</span>
-      </div>
-
       {/* Drop zone */}
       {status === 'idle' && (
         <div
@@ -137,46 +124,39 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer transition-colors ${
-            dragOver ? 'border-[#3DFF6E] bg-[#3DFF6E]/5' : 'border-[#2A2520] hover:border-[#7A7570]'
+          className={`border border-dashed p-10 flex flex-col items-center gap-3 cursor-crosshair transition-colors ${
+            dragOver ? 'border-[#1a1a1a] bg-[#f1f1f1]' : 'border-[#e0e0e0] hover:border-[#888]'
           }`}
         >
-          <div className="w-12 h-12 rounded-full bg-[#141210] flex items-center justify-center">
-            <svg width="20" height="20" fill="none" stroke="#7A7570" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-            </svg>
-          </div>
-          <div className="text-center">
-            <p className="text-[#F2EDE8] text-sm font-medium">Arraste uma foto aqui</p>
-            <p className="text-[#7A7570] text-xs mt-1">ou clique para selecionar · JPG, PNG até 12MB</p>
-          </div>
+          <p className="font-mono text-[0.65rem] tracking-[0.2em] uppercase text-[#1a1a1a]">
+            Arraste uma foto aqui
+          </p>
+          <p className="font-mono text-[0.55rem] tracking-[0.15em] uppercase text-[#888]">
+            ou clique para selecionar · JPG, PNG até 12MB
+          </p>
         </div>
       )}
 
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
 
-      {/* Processing spinner */}
+      {/* Processing */}
       <AnimatePresence>
         {(status === 'uploading' || status === 'processing' || status === 'saving') && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="border border-[#2A2520] rounded-xl p-6 flex flex-col items-center gap-3"
+            className="border border-[#e0e0e0] p-8 flex flex-col items-center gap-4"
           >
-            <svg className="animate-spin w-10 h-10 text-[#3DFF6E]" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-              <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            <p className="text-[#F2EDE8] text-sm font-medium">
-              {status === 'uploading' ? 'Enviando imagem...' : status === 'saving' ? 'Salvando recorte...' : 'Removendo fundo...'}
+            <div className="w-16 h-px bg-[#1a1a1a]" style={{ animation: 'loaderPulse 1.5s ease-in-out infinite alternate' }} />
+            <p className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888]">
+              {status === 'uploading' ? 'Enviando...' : status === 'saving' ? 'Salvando...' : 'Removendo fundo...'}
             </p>
-            <p className="text-[#7A7570] text-xs">Aguarde um momento</p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Crop step */}
+      {/* Crop */}
       <AnimatePresence>
         {status === 'cropping' && processedUrl && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
             <ImageCropper
               src={processedUrl}
               onCropDone={handleCropDone}
@@ -189,28 +169,28 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
       {/* Done */}
       <AnimatePresence>
         {status === 'done' && finalUrl && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="border border-[#3DFF6E]/30 rounded-xl overflow-hidden"
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="border border-[#e0e0e0]"
           >
-            <div className="bg-[#141210] p-3 flex items-center gap-2">
-              <svg width="14" height="14" fill="#3DFF6E" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-              </svg>
-              <span className="text-[#3DFF6E] text-xs font-medium">Imagem salva com sucesso</span>
+            <div className="relative aspect-square bg-[#f1f1f1]">
+              <Image src={finalUrl} alt="Camiseta" fill className="object-contain p-6" />
             </div>
-            <div className="relative h-64" style={checkerStyle}>
-              <Image src={finalUrl} alt="Camiseta final" fill className="object-contain p-4" />
+            <div className="p-3 border-t border-[#e0e0e0]">
+              <span className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888]">Salvo</span>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {error && (
-        <div className="bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2 flex items-center justify-between">
-          <p className="text-red-400 text-sm">{error}</p>
-          <Button variant="ghost" onClick={() => { setStatus('idle'); setError(null) }} className="text-xs h-auto py-1 px-2">
+        <div className="border border-red-200 px-4 py-3 flex items-center justify-between">
+          <p className="font-mono text-[0.65rem] text-red-500">{error}</p>
+          <button
+            onClick={() => { setStatus('idle'); setError(null) }}
+            className="font-mono text-[0.6rem] tracking-[0.1em] uppercase text-[#888] hover:text-[#1a1a1a] ml-4 cursor-pointer"
+          >
             Tentar novamente
-          </Button>
+          </button>
         </div>
       )}
     </div>

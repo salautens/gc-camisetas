@@ -1,10 +1,19 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk } from 'next/font/google'
+import { Cormorant_Garamond, DM_Mono } from 'next/font/google'
 import './globals.css'
 
-const spaceGrotesk = Space_Grotesk({
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  variable: '--font-space-grotesk',
+  weight: ['300', '400', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const dmMono = DM_Mono({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  variable: '--font-mono',
   display: 'swap',
 })
 
@@ -19,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" className={spaceGrotesk.variable}>
+    <html lang="pt-BR" className={`${cormorant.variable} ${dmMono.variable}`}>
       <body>{children}</body>
     </html>
   )

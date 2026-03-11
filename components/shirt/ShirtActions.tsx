@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export function ShirtActions({ shirtId }: { shirtId: string }) {
+export function ShirtActions({ shirtId, onDeleted }: { shirtId: string; onDeleted?: () => void }) {
   const [confirming, setConfirming] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -13,24 +13,28 @@ export function ShirtActions({ shirtId }: { shirtId: string }) {
   async function handleDelete() {
     setLoading(true)
     await supabase.from('shirts').delete().eq('id', shirtId)
-    router.push('/gallery')
-    router.refresh()
+    if (onDeleted) {
+      onDeleted()
+    } else {
+      router.push('/gallery')
+      router.refresh()
+    }
   }
 
   if (confirming) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-[#7A7570] text-xs">Confirmar exclusão?</span>
+      <div className="flex items-center gap-4">
+        <span className="font-mono text-[0.6rem] tracking-[0.1em] text-[#888]">confirmar?</span>
         <button
           onClick={handleDelete}
           disabled={loading}
-          className="text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+          className="font-mono text-[0.6rem] tracking-[0.1em] uppercase text-red-500 disabled:opacity-40 cursor-pointer"
         >
-          {loading ? 'Excluindo...' : 'Excluir'}
+          {loading ? '...' : 'Excluir'}
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="text-xs text-[#7A7570] hover:text-[#F2EDE8] transition-colors"
+          className="font-mono text-[0.6rem] tracking-[0.1em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
         >
           Cancelar
         </button>
@@ -41,7 +45,7 @@ export function ShirtActions({ shirtId }: { shirtId: string }) {
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="text-xs text-[#7A7570] hover:text-red-400 transition-colors"
+      className="font-mono text-[0.6rem] tracking-[0.1em] uppercase text-[#888] hover:text-red-500 transition-colors cursor-pointer"
     >
       Excluir
     </button>

@@ -15,45 +15,38 @@ export function Nav() {
   }
 
   return (
-    <header className="border-b border-[#2A2520] bg-[#0A0908]/80 backdrop-blur-sm sticky top-0 z-40">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-[100] flex justify-between items-center px-10 py-6 mix-blend-difference pointer-events-none">
+      <Link
+        href="/gallery"
+        className="font-mono text-[0.85rem] tracking-[0.3em] uppercase text-white pointer-events-auto"
+      >
+        GC
+      </Link>
+
+      <nav className="flex items-center gap-8 pointer-events-auto">
         <Link
           href="/gallery"
-          className="text-[#F2EDE8] font-bold tracking-tight hover:text-[#3DFF6E] transition-colors text-lg"
+          className={`font-mono text-[0.7rem] tracking-[0.2em] uppercase transition-opacity ${
+            pathname === '/gallery' ? 'text-white opacity-100' : 'text-white opacity-60 hover:opacity-100'
+          }`}
         >
-          GC
+          Galeria
         </Link>
-
-        <nav className="flex items-center gap-1 sm:gap-4">
-          <Link
-            href="/gallery"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname === '/gallery'
-                ? 'text-[#3DFF6E] bg-[#3DFF6E]/10'
-                : 'text-[#7A7570] hover:text-[#F2EDE8] hover:bg-[#141210]'
-            }`}
-          >
-            Galeria
-          </Link>
-          <Link
-            href="/shirt/new"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname === '/shirt/new'
-                ? 'text-[#3DFF6E] bg-[#3DFF6E]/10'
-                : 'text-[#7A7570] hover:text-[#F2EDE8] hover:bg-[#141210]'
-            }`}
-          >
-            <span className="hidden sm:inline">Adicionar</span>
-            <span className="sm:hidden">+</span>
-          </Link>
-          <button
-            onClick={handleSignOut}
-            className="px-3 py-1.5 rounded-lg text-sm text-[#7A7570] hover:text-[#F2EDE8] hover:bg-[#141210] transition-colors"
-          >
-            Sair
-          </button>
-        </nav>
-      </div>
+        <Link
+          href="/shirt/new"
+          className={`font-mono text-[0.7rem] tracking-[0.2em] uppercase transition-opacity ${
+            pathname === '/shirt/new' ? 'text-white opacity-100' : 'text-white opacity-60 hover:opacity-100'
+          }`}
+        >
+          Adicionar
+        </Link>
+        <button
+          onClick={handleSignOut}
+          className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-white opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+        >
+          Sair
+        </button>
+      </nav>
     </header>
   )
 }

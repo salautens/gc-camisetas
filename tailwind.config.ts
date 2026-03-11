@@ -9,15 +9,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: '#0A0908',
-        surface: '#141210',
-        border: '#2A2520',
-        text: '#F2EDE8',
-        muted: '#7A7570',
-        accent: '#3DFF6E',
+        'gc-black':   '#1a1a1a',
+        'gc-white':   '#ffffff',
+        'gc-surface': '#f1f1f1',
+        'gc-border':  '#e0e0e0',
+        'gc-mid':     '#888888',
       },
       fontFamily: {
-        sans: ['var(--font-space-grotesk)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Georgia', 'serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
+      },
+      letterSpacing: {
+        'widest-2': '0.3em',
+        'widest-3': '0.35em',
       },
     },
   },

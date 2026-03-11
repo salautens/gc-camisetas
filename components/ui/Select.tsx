@@ -5,7 +5,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
     return (
       <select
         ref={ref}
-        className={`w-full rounded-lg bg-[#141210] border border-[#2A2520] text-[#F2EDE8] px-3 py-2.5 text-sm focus:outline-none focus:border-[#3DFF6E] transition-colors appearance-none cursor-pointer ${className}`}
+        className={`w-full bg-transparent border-b border-[#1a1a1a] text-[#1a1a1a] font-mono text-[0.7rem] tracking-[0.05em] py-2 px-0 focus:outline-none appearance-none cursor-pointer ${className}`}
         {...props}
       >
         {children}

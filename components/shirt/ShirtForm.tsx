@@ -49,130 +49,98 @@ export function ShirtForm({ userId }: ShirtFormProps) {
       processing_status: 'none',
     }
 
-    if (shirtId) {
-      // Update existing
-      const { error } = await supabase.from('shirts').update(payload).eq('id', shirtId)
-      if (error) { setError(error.message); setLoading(false); return }
-    } else {
-      // Insert new
-      const { data, error } = await supabase.from('shirts').insert(payload).select().single()
-      if (error) { setError(error.message); setLoading(false); return }
-      setShirtId(data.id)
-      setLoading(false)
-      return
-    }
-
+    const { data, error } = await supabase.from('shirts').insert(payload).select().single()
+    if (error) { setError(error.message); setLoading(false); return }
+    setShirtId(data.id)
     setLoading(false)
-    router.push(`/shirt/${shirtId}`)
   }
 
   return (
-    <div className="max-w-xl">
-      <h1 className="text-2xl font-bold text-[#F2EDE8] mb-8">Nova camiseta</h1>
+    <div className="min-h-screen px-10 pt-32 pb-20 max-w-lg">
+      <p className="font-mono text-[0.6rem] tracking-[0.35em] uppercase text-[#888] mb-2">Nova camiseta</p>
+      <h1 className="font-display font-light text-[clamp(2.5rem,6vw,5rem)] leading-[0.9] tracking-[-0.02em] text-[#1a1a1a] mb-12">
+        Registrar
+      </h1>
 
-      <form onSubmit={handleSave} className="space-y-5">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="clube">Clube *</Label>
-            <Input
-              id="clube"
-              value={clube}
-              onChange={(e) => setClube(e.target.value)}
-              placeholder="Ex: Flamengo"
-              required
-            />
+      {!shirtId ? (
+        <form onSubmit={handleSave} className="space-y-8">
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <Label htmlFor="clube">Clube *</Label>
+              <Input id="clube" value={clube} onChange={(e) => setClube(e.target.value)} placeholder="Flamengo" required />
+            </div>
+            <div>
+              <Label htmlFor="temporada">Temporada *</Label>
+              <Input id="temporada" value={temporada} onChange={(e) => setTemporada(e.target.value)} placeholder="2023/24" required />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="temporada">Temporada *</Label>
-            <Input
-              id="temporada"
-              value={temporada}
-              onChange={(e) => setTemporada(e.target.value)}
-              placeholder="Ex: 2023/24"
-              required
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <Label htmlFor="versao">Versão</Label>
+              <Select id="versao" value={versao} onChange={(e) => setVersao(e.target.value as Shirt['versao'])}>
+                <option value="home">Titular</option>
+                <option value="away">Visitante</option>
+                <option value="third">Terceiro</option>
+                <option value="goalkeeper">Goleiro</option>
+                <option value="special">Especial</option>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="fabricante">Fabricante</Label>
+              <Input id="fabricante" value={fabricante} onChange={(e) => setFabricante(e.target.value)} placeholder="Nike, Adidas..." />
+            </div>
+          </div>
+
           <div>
-            <Label htmlFor="versao">Versão</Label>
-            <Select
-              id="versao"
-              value={versao}
-              onChange={(e) => setVersao(e.target.value as Shirt['versao'])}
-            >
-              <option value="home">Titular</option>
-              <option value="away">Visitante</option>
-              <option value="third">Terceiro</option>
-              <option value="goalkeeper">Goleiro</option>
-              <option value="special">Especial</option>
+            <Label htmlFor="condicao">Condição</Label>
+            <Select id="condicao" value={condicao || ''} onChange={(e) => setCondicao(e.target.value as Shirt['condicao'] || null)}>
+              <option value="">—</option>
+              <option value="mint">Mint</option>
+              <option value="excellent">Excellent</option>
+              <option value="good">Good</option>
+              <option value="worn">Worn</option>
             </Select>
           </div>
+
           <div>
-            <Label htmlFor="fabricante">Fabricante</Label>
-            <Input
-              id="fabricante"
-              value={fabricante}
-              onChange={(e) => setFabricante(e.target.value)}
-              placeholder="Ex: Nike, Adidas..."
+            <Label htmlFor="historia">História</Label>
+            <Textarea
+              id="historia"
+              value={historia}
+              onChange={(e) => setHistoria(e.target.value)}
+              placeholder="Como conseguiu essa camisa?"
+              rows={3}
             />
           </div>
-        </div>
 
-        <div>
-          <Label htmlFor="condicao">Condição</Label>
-          <Select
-            id="condicao"
-            value={condicao || ''}
-            onChange={(e) => setCondicao(e.target.value as Shirt['condicao'] || null)}
-          >
-            <option value="">Não informado</option>
-            <option value="mint">Mint — perfeita</option>
-            <option value="excellent">Excellent — excelente</option>
-            <option value="good">Good — boa</option>
-            <option value="worn">Worn — usada</option>
-          </Select>
-        </div>
+          {error && (
+            <p className="font-mono text-[0.65rem] text-red-500 border border-red-200 px-3 py-2">{error}</p>
+          )}
 
-        <div>
-          <Label htmlFor="historia">História</Label>
-          <Textarea
-            id="historia"
-            value={historia}
-            onChange={(e) => setHistoria(e.target.value)}
-            placeholder="Como conseguiu essa camisa? Qual memória ela guarda?"
-            rows={3}
-          />
-        </div>
-
-        {error && (
-          <p className="text-red-400 text-sm bg-red-400/10 rounded-lg px-3 py-2">{error}</p>
-        )}
-
-        {!shirtId && (
-          <Button type="submit" loading={loading} className="w-full">
-            Salvar e adicionar foto
+          <Button type="submit" loading={loading}>
+            Salvar e adicionar foto →
           </Button>
-        )}
-      </form>
+        </form>
+      ) : (
+        <div>
+          <p className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888] mb-8">
+            Camiseta salva — adicione uma foto
+          </p>
 
-      {/* Kit Lens — shown after shirt is saved */}
-      {shirtId && (
-        <div className="mt-8 pt-8 border-t border-[#2A2520]">
           <KitLensUploader
             shirtId={shirtId}
             userId={userId}
-            redirectTo={`/shirt/${shirtId}`}
+            redirectTo={`/gallery`}
           />
-          <div className="mt-4 flex gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => router.push(`/shirt/${shirtId}`)}
-              className="flex-1"
+
+          <div className="mt-6">
+            <button
+              onClick={() => router.push('/gallery')}
+              className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
             >
-              Pular por agora
-            </Button>
+              Pular por agora →
+            </button>
           </div>
         </div>
       )}

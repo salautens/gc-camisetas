@@ -4,15 +4,15 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/Textarea'
+import { Button } from '@/components/ui/Button'
 
 const STEPS = [
-  { title: 'Bem-vindo ao GC', subtitle: 'Sua galeria de camisetas de futebol' },
-  { title: 'Seu clube', subtitle: 'Qual é o time do coração?' },
-  { title: 'Por que colecionar?', subtitle: 'O que te move nesse hobby?' },
+  { label: '01', question: 'Como quer ser chamado?' },
+  { label: '02', question: 'Qual é o clube do coração?' },
+  { label: '03', question: 'Por que você coleciona?' },
 ]
 
 export function OnboardingWizard({ userId }: { userId: string }) {
@@ -43,104 +43,112 @@ export function OnboardingWizard({ userId }: { userId: string }) {
       onboarding_done: true,
     })
 
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
-
+    if (error) { setError(error.message); setLoading(false); return }
     router.push('/gallery')
   }
 
+  function handleNext() {
+    if (step < STEPS.length - 1) setStep(step + 1)
+    else handleFinish()
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Progress */}
-        <div className="flex gap-2 mb-8">
-          {STEPS.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1 flex-1 rounded-full transition-colors duration-300 ${i <= step ? 'bg-[#3DFF6E]' : 'bg-[#2A2520]'}`}
-            />
-          ))}
-        </div>
+    <div className="min-h-screen bg-white flex flex-col justify-between px-10 py-16">
+      {/* Step indicator */}
+      <div className="flex gap-2">
+        {STEPS.map((_, i) => (
+          <div
+            key={i}
+            className={`h-px flex-1 transition-colors duration-500 ${i <= step ? 'bg-[#1a1a1a]' : 'bg-[#e0e0e0]'}`}
+          />
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="max-w-sm">
+        <p className="font-mono text-[0.6rem] tracking-[0.35em] uppercase text-[#888] mb-4">
+          {STEPS[step].label} / 03
+        </p>
 
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
           >
-            <h2 className="text-2xl font-bold text-[#F2EDE8] mb-1">{STEPS[step].title}</h2>
-            <p className="text-[#7A7570] text-sm mb-8">{STEPS[step].subtitle}</p>
+            <h2 className="font-display font-light text-[clamp(2rem,5vw,3.5rem)] leading-[0.95] tracking-[-0.02em] text-[#1a1a1a] mb-8">
+              {STEPS[step].question}
+            </h2>
 
             {step === 0 && (
               <div>
-                <Label htmlFor="name">Como quer ser chamado?</Label>
+                <Label htmlFor="name">Nome</Label>
                 <Input
                   id="name"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Seu nome ou apelido"
                   autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && canAdvance() && handleNext()}
                 />
               </div>
             )}
 
             {step === 1 && (
               <div>
-                <Label htmlFor="club">Clube principal</Label>
+                <Label htmlFor="club">Clube</Label>
                 <Input
                   id="club"
                   value={mainClub}
                   onChange={(e) => setMainClub(e.target.value)}
-                  placeholder="Ex: Flamengo, Barcelona, Manchester City..."
+                  placeholder="Flamengo, Barcelona..."
                   autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && canAdvance() && handleNext()}
                 />
               </div>
             )}
 
             {step === 2 && (
               <div>
-                <Label htmlFor="why">Por que você coleciona? (opcional)</Label>
+                <Label htmlFor="why">Motivo (opcional)</Label>
                 <Textarea
                   id="why"
                   value={whyCollect}
                   onChange={(e) => setWhyCollect(e.target.value)}
                   placeholder="Memórias, paixão pelo futebol, design das camisetas..."
-                  rows={4}
+                  rows={3}
                   autoFocus
                 />
               </div>
             )}
 
             {error && (
-              <p className="mt-3 text-red-400 text-sm bg-red-400/10 rounded-lg px-3 py-2">{error}</p>
+              <p className="mt-4 font-mono text-[0.65rem] text-red-500 border border-red-200 px-3 py-2">{error}</p>
             )}
           </motion.div>
         </AnimatePresence>
+      </div>
 
-        <div className="flex justify-between mt-8">
-          {step > 0 ? (
-            <Button variant="ghost" onClick={() => setStep(step - 1)}>
-              Voltar
-            </Button>
-          ) : (
-            <div />
-          )}
+      {/* Navigation */}
+      <div className="flex items-center justify-between">
+        {step > 0 ? (
+          <button
+            onClick={() => setStep(step - 1)}
+            className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
+          >
+            ← Voltar
+          </button>
+        ) : <div />}
 
-          {step < STEPS.length - 1 ? (
-            <Button onClick={() => setStep(step + 1)} disabled={!canAdvance()}>
-              Continuar
-            </Button>
-          ) : (
-            <Button onClick={handleFinish} loading={loading}>
-              Entrar na galeria
-            </Button>
-          )}
-        </div>
+        <Button
+          onClick={handleNext}
+          disabled={!canAdvance()}
+          loading={loading && step === STEPS.length - 1}
+        >
+          {step < STEPS.length - 1 ? 'Continuar →' : 'Entrar na galeria →'}
+        </Button>
       </div>
     </div>
   )

@@ -8,13 +8,15 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   }, [error])
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
-      <p className="text-5xl mb-4">⚠️</p>
-      <h1 className="text-xl font-bold text-[#F2EDE8] mb-2">Algo deu errado</h1>
-      <p className="text-[#7A7570] text-sm mb-8 max-w-sm">{error.message || 'Erro inesperado. Tente novamente.'}</p>
+    <main className="min-h-screen flex flex-col items-center justify-center px-10 text-center">
+      <p className="font-mono text-[0.55rem] tracking-[0.35em] uppercase text-[#888] mb-4">Erro</p>
+      <h1 className="font-display font-light text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-[-0.02em] text-[#1a1a1a] mb-6">
+        Algo deu<br/><em>errado</em>
+      </h1>
+      <p className="font-mono text-[0.65rem] text-[#888] mb-8 max-w-xs">{error.message || 'Erro inesperado. Tente novamente.'}</p>
       <button
         onClick={reset}
-        className="bg-[#3DFF6E] text-[#0A0908] font-medium text-sm px-5 py-2.5 rounded-lg hover:bg-[#2EDD58] transition-colors"
+        className="font-mono text-[0.7rem] tracking-[0.1em] border border-[#1a1a1a] rounded-[2rem] px-5 py-2 text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white transition-all duration-150 cursor-pointer"
       >
         Tentar novamente
       </button>

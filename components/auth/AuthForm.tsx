@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { useRouter } from 'next/navigation'
 
@@ -48,63 +47,86 @@ export function AuthForm() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#F2EDE8] mb-1">GC</h1>
-        <p className="text-[#7A7570] text-sm">Galeria de Camisetas</p>
+    <div className="min-h-screen bg-[#1a1a1a] flex items-end pb-16 px-10">
+      {/* Background GC text */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none">
+        <span
+          className="font-display font-light text-transparent leading-[0.85] tracking-[-0.02em]"
+          style={{
+            fontSize: 'clamp(14rem, 30vw, 28rem)',
+            WebkitTextStroke: '1px rgba(255,255,255,0.04)',
+          }}
+        >
+          GC
+        </span>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="seu@email.com"
-            required
-            autoComplete="email"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            minLength={6}
-          />
-        </div>
-
-        {error && (
-          <p className="text-red-400 text-sm bg-red-400/10 rounded-lg px-3 py-2">{error}</p>
-        )}
-
-        {message && (
-          <p className="text-[#3DFF6E] text-sm bg-[#3DFF6E]/10 rounded-lg px-3 py-2">{message}</p>
-        )}
-
-        <Button type="submit" loading={loading} className="w-full">
+      <div className="relative z-10 w-full max-w-xs">
+        <p className="font-mono text-[0.6rem] tracking-[0.3em] uppercase text-white/40 mb-2">
           {mode === 'login' ? 'Entrar' : 'Criar conta'}
-        </Button>
-      </form>
+        </p>
+        <h1 className="font-display font-light text-[clamp(3rem,8vw,6rem)] leading-[0.9] tracking-[-0.02em] text-white mb-10">
+          GC
+        </h1>
 
-      <p className="mt-6 text-center text-sm text-[#7A7570]">
-        {mode === 'login' ? 'Novo por aqui?' : 'Já tem conta?'}{' '}
-        <button
-          type="button"
-          onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null); setMessage(null) }}
-          className="text-[#3DFF6E] hover:underline"
-        >
-          {mode === 'login' ? 'Criar conta' : 'Entrar'}
-        </button>
-      </p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <Label htmlFor="email" className="text-white/40">Email</Label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              required
+              autoComplete="email"
+              className="w-full bg-transparent border-b border-white/20 text-white placeholder-white/20 font-mono text-[0.7rem] tracking-[0.05em] py-2 px-0 focus:outline-none focus:border-white/60 transition-colors"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="password" className="text-white/40">Senha</Label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+              minLength={6}
+              className="w-full bg-transparent border-b border-white/20 text-white placeholder-white/20 font-mono text-[0.7rem] tracking-[0.05em] py-2 px-0 focus:outline-none focus:border-white/60 transition-colors"
+            />
+          </div>
+
+          {error && (
+            <p className="font-mono text-[0.65rem] text-red-400 border border-red-400/20 px-3 py-2">{error}</p>
+          )}
+
+          {message && (
+            <p className="font-mono text-[0.65rem] text-white/60 border border-white/10 px-3 py-2">{message}</p>
+          )}
+
+          <Button
+            type="submit"
+            loading={loading}
+            className="border-white/30 text-white hover:bg-white hover:text-[#1a1a1a]"
+          >
+            {mode === 'login' ? 'Entrar' : 'Criar conta'}
+          </Button>
+        </form>
+
+        <p className="mt-8 font-mono text-[0.6rem] tracking-[0.1em] text-white/30">
+          {mode === 'login' ? 'Novo por aqui?' : 'Já tem conta?'}{' '}
+          <button
+            type="button"
+            onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null); setMessage(null) }}
+            className="text-white/60 hover:text-white transition-colors cursor-pointer"
+          >
+            {mode === 'login' ? 'Criar conta' : 'Entrar'}
+          </button>
+        </p>
+      </div>
     </div>
   )
 }
