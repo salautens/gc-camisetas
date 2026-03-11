@@ -26,8 +26,13 @@ export function AuthForm() {
     reset()
 
     if (mode === 'forgot') {
-      const { error } = await supabase.auth.resetPasswordForEmail(email)
-      if (error) setError(error.message)
+      const res = await fetch('/api/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) setError(body.error || 'Erro ao enviar email')
       else setMessage('Link enviado. Verifique seu email.')
       setLoading(false)
       return
