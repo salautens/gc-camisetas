@@ -12,6 +12,7 @@ export function AuthForm() {
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -26,14 +27,15 @@ export function AuthForm() {
     reset()
 
     if (mode === 'forgot') {
+      if (newPassword.length < 6) { setError('Senha deve ter pelo menos 6 caracteres'); setLoading(false); return }
       const res = await fetch('/api/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, password: newPassword }),
       })
       const body = await res.json().catch(() => ({}))
-      if (!res.ok) setError(body.error || 'Erro ao enviar email')
-      else setMessage('Link enviado. Verifique seu email.')
+      if (!res.ok) setError(body.error || 'Erro ao atualizar senha')
+      else { setMessage('Senha alterada! Entrando...'); setTimeout(() => { setMode('login'); setMessage(null) }, 1500) }
       setLoading(false)
       return
     }
@@ -104,6 +106,23 @@ export function AuthForm() {
                 required
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 minLength={6}
+                className="w-full bg-transparent border-b border-white/20 text-white placeholder-white/20 font-mono text-[0.7rem] tracking-[0.05em] py-2 px-0 focus:outline-none focus:border-white/60 transition-colors"
+              />
+            </div>
+          )}
+
+          {mode === 'forgot' && (
+            <div>
+              <Label htmlFor="newPassword" className="text-white/40">Nova senha</Label>
+              <input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={6}
+                autoFocus
                 className="w-full bg-transparent border-b border-white/20 text-white placeholder-white/20 font-mono text-[0.7rem] tracking-[0.05em] py-2 px-0 focus:outline-none focus:border-white/60 transition-colors"
               />
             </div>
