@@ -20,7 +20,6 @@ interface KitLensUploaderProps {
 export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: KitLensUploaderProps) {
   const router = useRouter()
   const [status, setStatus] = useState<UploadStatus>('idle')
-  const [originalUrl, setOriginalUrl] = useState<string | null>(null)
   const [processedUrl, setProcessedUrl] = useState<string | null>(null)
   const [finalUrl, setFinalUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -45,8 +44,6 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
     if (uploadError) { setError(uploadError.message); setStatus('failed'); return }
 
     const { data: { publicUrl } } = supabase.storage.from('shirt-originals').getPublicUrl(path)
-    setOriginalUrl(publicUrl)
-
     await supabase.from('shirts').update({ original_url: publicUrl, processing_status: 'pending' }).eq('id', shirtId)
     setStatus('processing')
 
