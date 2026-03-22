@@ -18,6 +18,7 @@ interface ShirtFormProps {
 export function ShirtForm({ userId }: ShirtFormProps) {
   const [clube, setClube] = useState('')
   const [temporada, setTemporada] = useState('')
+  const [liga, setLiga] = useState('')
   const [versao, setVersao] = useState<Shirt['versao']>('home')
   const [fabricante, setFabricante] = useState('')
   const [condicao, setCondicao] = useState<Shirt['condicao']>(null)
@@ -42,6 +43,7 @@ export function ShirtForm({ userId }: ShirtFormProps) {
       user_id: userId,
       clube: clube.trim(),
       temporada: temporada.trim(),
+      liga: liga.trim() || null,
       versao,
       fabricante: fabricante.trim() || null,
       condicao: condicao || null,
@@ -56,26 +58,27 @@ export function ShirtForm({ userId }: ShirtFormProps) {
   }
 
   return (
-    <div className="min-h-screen px-10 pt-32 pb-20 max-w-lg">
-      <p className="font-mono text-[0.6rem] tracking-[0.35em] uppercase text-[#888] mb-2">Nova camiseta</p>
+    <div className="min-h-screen flex items-center justify-center px-5 sm:px-10 py-24 sm:py-20">
+      <div className="w-full max-w-lg">
+      <p className="font-mono text-[1rem] tracking-[0.35em] uppercase text-[#888] mb-2">Nova camiseta</p>
       <h1 className="font-display font-light text-[clamp(2.5rem,6vw,5rem)] leading-[0.9] tracking-[-0.02em] text-[#1a1a1a] mb-12">
         Registrar
       </h1>
 
       {!shirtId ? (
         <form onSubmit={handleSave} className="space-y-8">
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
             <div>
               <Label htmlFor="clube">Clube *</Label>
               <Input id="clube" value={clube} onChange={(e) => setClube(e.target.value)} placeholder="Flamengo" required />
             </div>
             <div>
               <Label htmlFor="temporada">Temporada *</Label>
-              <Input id="temporada" value={temporada} onChange={(e) => setTemporada(e.target.value)} placeholder="2023/24" required />
+              <Input id="temporada" value={temporada} onChange={(e) => setTemporada(e.target.value)} placeholder="2002–03" required />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
             <div>
               <Label htmlFor="versao">Versão</Label>
               <Select id="versao" value={versao} onChange={(e) => setVersao(e.target.value as Shirt['versao'])}>
@@ -87,20 +90,26 @@ export function ShirtForm({ userId }: ShirtFormProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="fabricante">Fabricante</Label>
-              <Input id="fabricante" value={fabricante} onChange={(e) => setFabricante(e.target.value)} placeholder="Nike, Adidas..." />
+              <Label htmlFor="liga">Liga</Label>
+              <Input id="liga" value={liga} onChange={(e) => setLiga(e.target.value)} placeholder="Brasileirão, Champions..." />
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="condicao">Condição</Label>
-            <Select id="condicao" value={condicao || ''} onChange={(e) => setCondicao(e.target.value as Shirt['condicao'] || null)}>
-              <option value="">—</option>
-              <option value="mint">Mint</option>
-              <option value="excellent">Excellent</option>
-              <option value="good">Good</option>
-              <option value="worn">Worn</option>
-            </Select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+            <div>
+              <Label htmlFor="fabricante">Fornecedor</Label>
+              <Input id="fabricante" value={fabricante} onChange={(e) => setFabricante(e.target.value)} placeholder="Nike, Adidas..." />
+            </div>
+            <div>
+              <Label htmlFor="condicao">Condição</Label>
+              <Select id="condicao" value={condicao || ''} onChange={(e) => setCondicao(e.target.value as Shirt['condicao'] || null)}>
+                <option value="">—</option>
+                <option value="nova">Nova</option>
+                <option value="boa">Boa condição</option>
+                <option value="usada">Usada</option>
+                <option value="desfeitos">Desfeitos</option>
+              </Select>
+            </div>
           </div>
 
           <div>
@@ -109,13 +118,13 @@ export function ShirtForm({ userId }: ShirtFormProps) {
               id="historia"
               value={historia}
               onChange={(e) => setHistoria(e.target.value)}
-              placeholder="Como conseguiu essa camisa?"
+              placeholder="A história por trás deste kit..."
               rows={3}
             />
           </div>
 
           {error && (
-            <p className="font-mono text-[0.65rem] text-red-500 border border-red-200 px-3 py-2">{error}</p>
+            <p className="font-mono text-[1rem] text-red-500 border border-red-200 px-3 py-2">{error}</p>
           )}
 
           <Button type="submit" loading={loading}>
@@ -124,8 +133,8 @@ export function ShirtForm({ userId }: ShirtFormProps) {
         </form>
       ) : (
         <div>
-          <p className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888] mb-8">
-            Camiseta salva — adicione uma foto
+          <p className="font-mono text-[1rem] tracking-[0.2em] uppercase text-[#888] mb-8">
+            Kit salvo. Adicione uma foto.
           </p>
 
           <KitLensUploader
@@ -137,13 +146,14 @@ export function ShirtForm({ userId }: ShirtFormProps) {
           <div className="mt-6">
             <button
               onClick={() => router.push('/gallery')}
-              className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
+              className="font-mono text-[1rem] tracking-[0.2em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
             >
               Pular por agora →
             </button>
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

@@ -16,10 +16,10 @@ const VERSAO_LABEL: Record<string, string> = {
 }
 
 const CONDICAO_LABEL: Record<string, string> = {
-  mint: 'Mint',
-  excellent: 'Excellent',
-  good: 'Good',
-  worn: 'Worn',
+  nova: 'Nova',
+  boa: 'Boa condição',
+  usada: 'Usada',
+  desfeitos: 'Desfeitos',
 }
 
 interface ShirtDetailPanelProps {
@@ -48,21 +48,21 @@ export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanel
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ duration: 0.6, ease: [0.85, 0, 0.15, 1] }}
-          className="fixed top-0 right-0 w-full sm:w-[50vw] h-full bg-[#f1f1f1] z-[6] overflow-y-auto"
-          style={{ padding: 'clamp(2rem, 4vw, 4rem) clamp(2rem, 4vw, 5rem)' }}
+          className="fixed top-0 right-0 w-full sm:w-[50vw] h-full bg-[#f9f9f9] z-[101] sm:z-[6] overflow-y-auto"
+          style={{ padding: 'clamp(5rem, 8vw, 4rem) clamp(1.25rem, 4vw, 5rem) 2rem' }}
         >
           {/* Close + actions */}
-          <div className="flex items-center justify-between mb-12 mt-2">
+          <div className="flex items-center justify-between mb-8 sm:mb-12">
             <button
               onClick={onClose}
-              className="font-mono text-[0.6rem] tracking-[0.25em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-crosshair"
+              className="font-mono text-[1rem] tracking-[0.25em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-crosshair"
             >
               ← Fechar
             </button>
             <div className="flex items-center gap-6">
               <Link
                 href={`/shirt/${shirt.id}/edit`}
-                className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors"
+                className="font-mono text-[1rem] tracking-[0.2em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors"
               >
                 Editar
               </Link>
@@ -76,7 +76,7 @@ export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanel
               {shirt.clube}
             </h2>
           </div>
-          <p className="font-mono text-[0.65rem] tracking-[0.25em] uppercase text-[#888] mb-10">
+          <p className="font-mono text-[1rem] tracking-[0.25em] uppercase text-[#888] mb-10">
             {shirt.temporada} — {VERSAO_LABEL[shirt.versao]}
           </p>
 
@@ -100,8 +100,11 @@ export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanel
 
           {/* Details */}
           <div className="space-y-0 border-t border-[#e0e0e0]">
+            {shirt.liga && (
+              <DetailRow label="Liga" value={shirt.liga} />
+            )}
             {shirt.fabricante && (
-              <DetailRow label="Fabricante" value={shirt.fabricante} />
+              <DetailRow label="Fornecedor" value={shirt.fabricante} />
             )}
             {shirt.condicao && (
               <DetailRow label="Condição" value={CONDICAO_LABEL[shirt.condicao] || shirt.condicao} />
@@ -111,8 +114,8 @@ export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanel
 
           {shirt.historia && (
             <div className="mt-8">
-              <p className="font-mono text-[0.55rem] tracking-[0.3em] uppercase text-[#888] mb-3">História</p>
-              <p className="font-mono text-[0.75rem] leading-[1.9] text-[#1a1a1a]">{shirt.historia}</p>
+              <p className="font-mono text-[1rem] tracking-[0.3em] uppercase text-[#888] mb-3">História</p>
+              <p className="font-mono text-[1rem] leading-[1.9] text-[#1a1a1a]">{shirt.historia}</p>
             </div>
           )}
         </motion.aside>
@@ -124,8 +127,8 @@ export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanel
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-baseline py-3 border-b border-[#e0e0e0]">
-      <span className="font-mono text-[0.55rem] tracking-[0.25em] uppercase text-[#888]">{label}</span>
-      <span className="font-mono text-[0.7rem] tracking-[0.05em] text-[#1a1a1a]">{value}</span>
+      <span className="font-mono text-[1rem] tracking-[0.25em] uppercase text-[#888]">{label}</span>
+      <span className="font-mono text-[1rem] tracking-[0.05em] text-[#1a1a1a]">{value}</span>
     </div>
   )
 }

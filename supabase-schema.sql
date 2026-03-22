@@ -36,8 +36,9 @@ create table if not exists public.shirts (
   clube text not null,
   temporada text not null,
   versao text not null check (versao in ('home','away','third','goalkeeper','special')),
+  liga text,
   fabricante text,
-  condicao text check (condicao in ('mint','excellent','good','worn')),
+  condicao text check (condicao in ('nova','boa','usada','desfeitos')),
   historia text,
   original_url text,
   processed_url text,
@@ -89,3 +90,15 @@ create policy "shirts: own delete" on public.shirts
 --   shirt-processed SELECT: bucket_id = 'shirt-processed'
 --   shirt-processed INSERT: auth.role() = 'service_role'
 -- =============================================================
+
+-- =============================================================
+-- MIGRATION: Run this if the table already exists
+-- =============================================================
+
+-- Add liga column
+alter table public.shirts add column if not exists liga text;
+
+-- Update condicao constraint (nova, boa, usada, desfeitos)
+alter table public.shirts drop constraint if exists shirts_condicao_check;
+alter table public.shirts add constraint shirts_condicao_check
+  check (condicao in ('nova','boa','usada','desfeitos'));

@@ -12,9 +12,10 @@ export type Shirt = {
   user_id: string
   clube: string
   temporada: string
+  liga: string | null
   versao: 'home' | 'away' | 'third' | 'goalkeeper' | 'special'
   fabricante: string | null
-  condicao: 'mint' | 'excellent' | 'good' | 'worn' | null
+  condicao: 'nova' | 'boa' | 'usada' | 'desfeitos' | null
   historia: string | null
   original_url: string | null
   processed_url: string | null
