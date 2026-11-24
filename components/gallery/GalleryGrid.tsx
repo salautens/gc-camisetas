@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShirtCard } from './ShirtCard'
 import { ShirtDetailPanel } from './ShirtDetailPanel'
@@ -23,9 +24,13 @@ export function GalleryGrid({ shirts: initialShirts }: { shirts: Shirt[] }) {
   if (shirts.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-8">
-        <div className="font-display font-light text-[clamp(5rem,15vw,12rem)] leading-[0.85] tracking-[-0.03em] text-black/10 select-none">
-          GC
-        </div>
+        <Image
+          src="/images/gc-retro-shirt.png"
+          alt="Camiseta retrô da Galeria de Camisetas com gola de cadarço"
+          width={1280}
+          height={1280}
+          className="w-48 sm:w-64 h-auto object-contain select-none"
+        />
         <div className="text-center">
           <p className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-[#888] mb-6">
             Coleção vazia
