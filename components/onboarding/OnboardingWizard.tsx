@@ -98,7 +98,7 @@ export function OnboardingWizard({ userId }: { userId: string }) {
 
             {step === 1 && (
               <div>
-                <Label htmlFor="club">Clube</Label>
+                <Label htmlFor="club">Clube (opcional)</Label>
                 <Input
                   id="club"
                   value={mainClub}
@@ -142,6 +142,16 @@ export function OnboardingWizard({ userId }: { userId: string }) {
           </button>
         ) : <div />}
 
+        <div className="flex items-center gap-6">
+          {step === 1 && (
+            <button
+              type="button"
+              onClick={() => { setMainClub(''); setStep(2) }}
+              className="font-mono text-[0.6rem] tracking-[0.2em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
+            >
+              Pular
+            </button>
+          )}
         <Button
           onClick={handleNext}
           disabled={!canAdvance()}
@@ -149,6 +159,7 @@ export function OnboardingWizard({ userId }: { userId: string }) {
         >
           {step < STEPS.length - 1 ? 'Continuar →' : 'Entrar na galeria →'}
         </Button>
+        </div>
       </div>
     </div>
   )
