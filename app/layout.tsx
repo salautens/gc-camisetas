@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, DM_Mono } from 'next/font/google'
 import './globals.css'
+import { ToastProvider } from '@/components/ui/Toast'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -29,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${dmMono.variable}`}>
-      <body>{children}</body>
+      <body><ToastProvider>{children}</ToastProvider></body>
     </html>
   )
 }
