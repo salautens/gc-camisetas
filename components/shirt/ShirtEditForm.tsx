@@ -36,10 +36,6 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (!clube.trim() || !temporada.trim()) {
-      setError('Clube e temporada são obrigatórios')
-      return
-    }
     setLoading(true)
     setError(null)
 
@@ -72,7 +68,7 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
         </button>
       </div>
       <h1 className="font-display font-light text-[clamp(2rem,5vw,4rem)] leading-[0.9] tracking-[-0.02em] text-[#1a1a1a] mb-12">
-        {shirt.clube}
+        {shirt.clube || 'Camiseta'}
       </h1>
 
       {/* Photo */}
@@ -81,7 +77,7 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
         {currentImageUrl && !showImageEditor ? (
           <div className="border border-[#e0e0e0]">
             <div className="relative aspect-square bg-[#f1f1f1]">
-              <Image src={currentImageUrl} alt={shirt.clube} fill className="object-contain p-6" />
+              <Image src={currentImageUrl} alt={shirt.clube || 'Camiseta'} fill className="object-contain p-6" />
             </div>
             <div className="p-3 border-t border-[#e0e0e0]">
               <button
@@ -125,14 +121,15 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
       </div>
 
       <form onSubmit={handleSave} className="space-y-8">
+          <p className="font-mono text-[0.85rem] leading-relaxed text-[#888]">Preencha o que souber. Você pode deixar os detalhes em branco e completar depois. A versão começa como Titular e pode ser alterada.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
           <div>
-            <Label htmlFor="clube">Clube *</Label>
-            <Input id="clube" value={clube} onChange={(e) => setClube(e.target.value)} required />
+            <Label htmlFor="clube">Clube</Label>
+            <Input id="clube" value={clube} onChange={(e) => setClube(e.target.value)} />
           </div>
           <div>
-            <Label htmlFor="temporada">Temporada *</Label>
-            <Input id="temporada" value={temporada} onChange={(e) => setTemporada(e.target.value)} placeholder="2002–03" required />
+            <Label htmlFor="temporada">Temporada</Label>
+            <Input id="temporada" value={temporada} onChange={(e) => setTemporada(e.target.value)} placeholder="2002–03" />
           </div>
         </div>
 
@@ -161,7 +158,7 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
           <div>
             <Label htmlFor="condicao">Condição</Label>
             <Select id="condicao" value={condicao || ''} onChange={(e) => setCondicao(e.target.value as Shirt['condicao'] || null)}>
-              <option value="">—</option>
+              <option value="">Não informada</option>
               <option value="nova">Nova</option>
               <option value="boa">Boa condição</option>
               <option value="usada">Usada</option>
