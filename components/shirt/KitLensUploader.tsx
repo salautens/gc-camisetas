@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { ImageCropper } from './ImageCropper'
+import { CameraCapture } from './CameraCapture'
 
 type UploadStatus = 'idle' | 'uploading' | 'processing' | 'cropping' | 'saving' | 'done' | 'failed'
 
@@ -23,6 +24,8 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
   const [finalUrl, setFinalUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
+  const [cameraOpen, setCameraOpen] = useState(false)
+  const closeCamera = useCallback(() => setCameraOpen(false), [])
   const fileRef = useRef<HTMLInputElement>(null)
   const pollRef = useRef<NodeJS.Timeout | null>(null)
   const supabase = createClient()
@@ -118,7 +121,7 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
   return (
     <div className="space-y-4">
       {/* Drop zone */}
-      {status === 'idle' && (
+      {status === 'idle' && !cameraOpen && (
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
           onDragLeave={() => setDragOver(false)}
@@ -137,7 +140,28 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
         </div>
       )}
 
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+      {status === 'idle' && !cameraOpen && (
+        <button
+          type="button"
+          onClick={() => { setError(null); setCameraOpen(true) }}
+          className="flex min-h-12 w-full items-center justify-center gap-3 border border-[#888] px-5 py-4 font-mono text-sm tracking-widest uppercase hover:bg-[#f1f1f1]"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <path d="M3 7h4l2-3h6l2 3h4v13H3Z" strokeLinejoin="round" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
+          Tirar foto com a câmera
+        </button>
+      )}
+
+      {status === 'idle' && cameraOpen && (
+        <CameraCapture onClose={closeCamera} onCapture={file => {
+          setCameraOpen(false)
+          void handleFile(file)
+        }} />
+      )}
+
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) handleFile(f) }} />
 
       {/* Processing */}
       <AnimatePresence>
