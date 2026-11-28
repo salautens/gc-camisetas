@@ -43,7 +43,7 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
       .from('shirt-originals')
       .upload(path, file, { upsert: true })
 
-    if (uploadError) { setError(uploadError.message); setStatus('failed'); return }
+    if (uploadError) { setError('Não foi possível enviar a foto. Atualize a página e tente novamente.'); setStatus('failed'); return }
 
     const { data: { publicUrl } } = supabase.storage.from('shirt-originals').getPublicUrl(path)
     await supabase.from('shirts').update({ original_url: publicUrl, processing_status: 'pending' }).eq('id', shirtId)
@@ -89,7 +89,7 @@ export function KitLensUploader({ shirtId, userId, redirectTo, onProcessed }: Ki
       .from('shirt-processed')
       .upload(croppedPath, blob, { contentType: 'image/png', upsert: true })
 
-    if (uploadError) { setError(uploadError.message); setStatus('failed'); return }
+    if (uploadError) { setError('Não foi possível enviar a foto. Atualize a página e tente novamente.'); setStatus('failed'); return }
 
     const { data: { publicUrl } } = supabase.storage.from('shirt-processed').getPublicUrl(croppedPath)
 
