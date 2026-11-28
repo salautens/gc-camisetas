@@ -5,9 +5,10 @@ import { useEffect, useRef, useState } from 'react'
 interface CameraCaptureProps {
   onCapture: (file: File) => void
   onClose: () => void
+  side?: 'front' | 'back'
 }
 
-export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
+export function CameraCapture({ onCapture, onClose, side = 'front' }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const nativeRef = useRef<HTMLInputElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -83,14 +84,14 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
       if (!blob) { setCapturing(false); setError('Não foi possível capturar a foto.'); return }
       stopCamera()
       onCapture(new File([blob], 'camiseta-' + Date.now() + '.jpg', { type: 'image/jpeg' }))
-    }, 'image/jpeg', 0.9)
+    }, 'image/jpeg', 0.95)
   }
 
   const buttonClass = 'min-h-11 border border-[#888] px-5 py-3 font-mono text-sm tracking-widest uppercase hover:bg-[#f1f1f1] disabled:opacity-40'
 
   return (
     <section aria-label="Câmera" className="space-y-4 border border-[#e0e0e0] p-4">
-      <p className="font-mono text-sm text-[#888]">Enquadre a camiseta e toque em Tirar foto.</p>
+      <p className="font-mono text-sm text-[#888]">Enquadre {side === 'front' ? 'a frente' : 'o verso'} da camiseta e toque em Tirar foto.</p>
       {!error && (
         <div className="relative overflow-hidden bg-black">
           <video
@@ -115,7 +116,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
               />
             </svg>
           </div>
-          <p className="pointer-events-none absolute bottom-3 left-0 right-0 text-center font-mono text-xs text-gray-200">Alinhe a camiseta com a silhueta</p>
+          <p className="pointer-events-none absolute bottom-3 left-0 right-0 text-center font-mono text-xs text-gray-200">{side === 'front' ? 'Frente' : 'Verso'} · Alinhe a camiseta com a silhueta</p>
         </div>
       )}
       {error && <p role="alert" className="font-mono text-sm text-red-600">{error}</p>}
