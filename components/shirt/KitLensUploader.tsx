@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { ImageCropper } from './ImageCropper'
 import { CameraCapture } from './CameraCapture'
 
 type Side = 'front' | 'back'
@@ -27,6 +28,7 @@ export function KitLensUploader({
   const supabase = createClient()
   const [photos, setPhotos] = useState({ front: initialFrontUrl, back: initialBackUrl })
   const [processed, setProcessed] = useState({ front: initialFrontProcessedUrl, back: initialBackProcessedUrl })
+  const [cropTarget, setCropTarget] = useState<{ side: Side; src: string } | null>(null)
   const [processing, setProcessing] = useState(false)
   const [side, setSide] = useState<Side>(initialFrontUrl ? 'back' : 'front')
   const [file, setFile] = useState<File | null>(null)
@@ -58,6 +60,7 @@ export function KitLensUploader({
 
   function selectSide(next: Side) {
     if (busyRef.current) return
+    setCropTarget(null)
     setSide(next)
     setFile(null)
     setError(null)
@@ -75,8 +78,10 @@ export function KitLensUploader({
       const body = await response.json().catch(() => ({}))
       if (!response.ok || typeof body.processed_url !== 'string') throw new Error('Processing failed')
       setProcessed(current => ({ ...current, [target]: body.processed_url }))
+      return body.processed_url as string
     } catch {
       setError('O original está salvo. A remoção de fundo não foi concluída; você pode tentar novamente ou continuar.')
+      return null
     } finally {
       setProcessing(false)
     }
@@ -87,7 +92,10 @@ export function KitLensUploader({
     busyRef.current = true
     setSaving(true)
     setError(null)
-    try { await processSide(side) }
+    try {
+      const processedUrl = await processSide(side)
+      if (processedUrl) setCropTarget({ side, src: processedUrl })
+    }
     finally { busyRef.current = false; setSaving(false) }
   }
 
@@ -111,9 +119,9 @@ export function KitLensUploader({
       if (saveError || !data) throw new Error('A foto não foi vinculada à camiseta. Tente novamente.')
       setPhotos(current => ({ ...current, [side]: publicUrl }))
       setProcessed(current => ({ ...current, [side]: null }))
-      await processSide(side)
+      const processedUrl = await processSide(side)
       setFile(null)
-      if (side === 'front' && !photos.back) setSide('back')
+      setCropTarget({ side, src: processedUrl || publicUrl })
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Não foi possível salvar a foto.')
     } finally {
@@ -122,8 +130,46 @@ export function KitLensUploader({
     }
   }
 
+  function finishCrop() {
+    const completedSide = cropTarget?.side
+    setCropTarget(null)
+    if (completedSide === 'front' && !photos.back) setSide('back')
+  }
+
+  async function saveCrop(blob: Blob) {
+    if (!cropTarget || busyRef.current) return
+    const target = cropTarget.side
+    busyRef.current = true
+    setSaving(true)
+    setError(null)
+    try {
+      // Store a derivative in the user's writable bucket; never overwrite the original.
+      const path = userId + '/' + shirtId + '/crop-' + target + '-' + crypto.randomUUID() + '.png'
+      const { error: uploadError } = await supabase.storage.from('shirt-originals')
+        .upload(path, blob, { contentType: 'image/png', upsert: false })
+      if (uploadError) throw new Error('Crop upload failed')
+      const { data: { publicUrl } } = supabase.storage.from('shirt-originals').getPublicUrl(path)
+      const update = target === 'front'
+        ? { processed_url: publicUrl, processing_status: 'done' }
+        : { back_processed_url: publicUrl }
+      const { data, error: saveError } = await supabase.from('shirts').update(update)
+        .eq('id', shirtId).eq('user_id', userId)
+        .eq(target === 'front' ? 'original_url' : 'back_original_url', photos[target]!)
+        .select('id').single()
+      if (saveError || !data) throw new Error('Crop save failed')
+      setProcessed(current => ({ ...current, [target]: publicUrl }))
+      finishCrop()
+    } catch {
+      setError('Não foi possível salvar o recorte. O original continua salvo.')
+      throw new Error('Crop save failed')
+    } finally {
+      busyRef.current = false
+      setSaving(false)
+    }
+  }
+
   function finish() {
-    if (!photos.front || !photos.back || saving) return
+    if (!photos.front || !photos.back || saving || cropTarget) return
     onProcessed?.(photos.front)
     if (redirectTo) router.push(redirectTo)
     else router.refresh()
@@ -138,7 +184,7 @@ export function KitLensUploader({
 
       <div className="grid grid-cols-2 gap-3">
         {(['front', 'back'] as const).map((item, index) => (
-          <button key={item} type="button" disabled={saving || (item === 'back' && !photos.front)} onClick={() => selectSide(item)}
+          <button key={item} type="button" disabled={saving || !!cropTarget || (item === 'back' && !photos.front)} onClick={() => selectSide(item)}
             aria-pressed={side === item}
             className={'border p-3 text-left disabled:opacity-40 ' + (side === item ? 'border-[#1a1a1a]' : 'border-[#e0e0e0]')}>
             <span className="font-mono text-sm uppercase tracking-widest">{index + 1}. {item === 'front' ? 'Frente' : 'Verso'}</span>
@@ -157,7 +203,7 @@ export function KitLensUploader({
       </p>
 
       {processing && <p role="status" className="font-mono text-sm text-[#888]">Removendo o fundo de {label.toLowerCase()}...</p>}
-      {!file && !cameraOpen && !saving && (
+      {!file && !cameraOpen && !saving && !cropTarget && (
         <div className="space-y-3">
           <button type="button" className={buttonClass + ' w-full'} onClick={() => { setError(null); setCameraOpen(true) }}>
             Tirar foto · {label}
@@ -174,6 +220,10 @@ export function KitLensUploader({
             Arraste a foto de {label.toLowerCase()} aqui
           </div>
         </div>
+      )}
+
+      {cropTarget && (
+        <ImageCropper key={cropTarget.side + cropTarget.src} src={cropTarget.src} onCropDone={saveCrop} onSkip={finishCrop} />
       )}
 
       {cameraOpen && <CameraCapture side={side} onClose={closeCamera} onCapture={selectFile} />}
@@ -199,14 +249,20 @@ export function KitLensUploader({
         if (selected) selectFile(selected)
       }} />
 
-      {photos[side] && !processed[side] && !file && !cameraOpen && (
+      {photos[side] && !processed[side] && !file && !cameraOpen && !cropTarget && (
         <button type="button" disabled={saving} className={buttonClass} onClick={retryBackground}>Tentar remover fundo · {label}</button>
+      )}
+      {photos[side] && !file && !cameraOpen && !cropTarget && !saving && (
+        <button type="button" className={buttonClass} onClick={() => {
+          setError(null)
+          setCropTarget({ side, src: (processed[side] || photos[side])! })
+        }}>Cortar e aproximar · {label}</button>
       )}
       {error && <p role="alert" className="border border-red-200 p-3 font-mono text-sm text-red-600">{error}</p>}
       <p className="font-mono text-sm text-[#888]" role="status">
         {photos.front && photos.back ? 'Frente e verso salvos.' : photos.front ? 'Frente salva. Agora registre o verso.' : 'Registre a frente para começar.'}
       </p>
-      {photos.front && photos.back && <button type="button" disabled={saving || !!file || cameraOpen} className={buttonClass + ' w-full'} onClick={finish}>Concluir registro →</button>}
+      {photos.front && photos.back && <button type="button" disabled={saving || !!file || cameraOpen || !!cropTarget} className={buttonClass + ' w-full'} onClick={finish}>Concluir registro →</button>}
     </section>
   )
 }
