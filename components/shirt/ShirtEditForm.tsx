@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/Textarea'
 import { KitLensUploader } from './KitLensUploader'
 import { useToast } from '@/components/ui/Toast'
 import type { Shirt } from '@/lib/types'
-import Image from 'next/image'
 
 interface ShirtEditFormProps {
   shirt: Shirt
@@ -27,8 +26,6 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
   const [historia, setHistoria] = useState(shirt.historia || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showImageEditor, setShowImageEditor] = useState(false)
-  const [currentImageUrl, setCurrentImageUrl] = useState(shirt.processed_url || shirt.original_url)
   const router = useRouter()
   const supabase = createClient()
   const { showToast } = useToast()
@@ -69,53 +66,15 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
         {shirt.clube || 'Camiseta'}
       </h1>
 
-      {/* Photo */}
       <div className="mb-10">
-        <Label>Foto</Label>
-        {currentImageUrl && !showImageEditor ? (
-          <div className="border border-[#e0e0e0]">
-            <div className="relative aspect-square bg-[#f1f1f1]">
-              <Image src={currentImageUrl} alt={shirt.clube || 'Camiseta'} fill className="object-contain p-6" />
-            </div>
-            <div className="p-3 border-t border-[#e0e0e0]">
-              <button
-                onClick={() => setShowImageEditor(true)}
-                className="font-mono text-[1rem] tracking-[0.15em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
-              >
-                Trocar foto
-              </button>
-            </div>
-          </div>
-        ) : !showImageEditor ? (
-          <button
-            onClick={() => setShowImageEditor(true)}
-            className="w-full border border-dashed border-[#e0e0e0] p-8 font-mono text-[1rem] tracking-[0.2em] uppercase text-[#888] hover:border-[#1a1a1a] transition-colors cursor-pointer"
-          >
-            + Adicionar foto
-          </button>
-        ) : null}
-
-        {showImageEditor && (
-          <div className="border border-[#e0e0e0] p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="font-mono text-[1rem] tracking-[0.2em] uppercase text-[#1a1a1a]">Nova foto</span>
-              <button
-                onClick={() => setShowImageEditor(false)}
-                className="font-mono text-[1rem] tracking-[0.1em] uppercase text-[#888] hover:text-[#1a1a1a] transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-            </div>
-            <KitLensUploader
-              shirtId={shirt.id}
-              userId={userId}
-              onProcessed={(url) => {
-                setCurrentImageUrl(url)
-                setShowImageEditor(false)
-              }}
-            />
-          </div>
-        )}
+        <KitLensUploader
+          shirtId={shirt.id}
+          userId={userId}
+          initialFrontUrl={shirt.original_url}
+          initialBackUrl={shirt.back_original_url}
+          initialFrontProcessedUrl={shirt.processed_url}
+          initialBackProcessedUrl={shirt.back_processed_url}
+        />
       </div>
 
       <form onSubmit={handleSave} className="space-y-8">
