@@ -1,3 +1,4 @@
+import { normalizeSupabaseConfig } from './config'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -5,8 +6,8 @@ export function createClient() {
   const cookieStore = cookies()
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!.trim(),
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!.trim(),
+    normalizeSupabaseConfig(process.env.NEXT_PUBLIC_SUPABASE_URL!),
+    normalizeSupabaseConfig(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
     {
       cookies: {
         getAll() {
@@ -30,8 +31,8 @@ export function createServiceClient() {
   const cookieStore = cookies()
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!.trim(),
-    process.env.SUPABASE_SERVICE_ROLE_KEY!.trim(),
+    normalizeSupabaseConfig(process.env.NEXT_PUBLIC_SUPABASE_URL!),
+    normalizeSupabaseConfig(process.env.SUPABASE_SERVICE_ROLE_KEY!),
     {
       cookies: {
         getAll() {
