@@ -18,6 +18,7 @@ export type Shirt = {
   condicao: 'nova' | 'boa' | 'usada' | 'desfeitos' | null
   historia: string | null
   back_original_url?: string | null
+  back_processed_url?: string | null
   original_url: string | null
   processed_url: string | null
   processing_status: 'none' | 'pending' | 'done' | 'failed'
