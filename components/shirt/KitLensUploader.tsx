@@ -14,15 +14,20 @@ interface KitLensUploaderProps {
   onProcessed?: (url: string) => void
   initialFrontUrl?: string | null
   initialBackUrl?: string | null
+  initialFrontProcessedUrl?: string | null
+  initialBackProcessedUrl?: string | null
 }
 
 export function KitLensUploader({
   shirtId, userId, redirectTo, onProcessed,
   initialFrontUrl = null, initialBackUrl = null,
+  initialFrontProcessedUrl = null, initialBackProcessedUrl = null,
 }: KitLensUploaderProps) {
   const router = useRouter()
   const supabase = createClient()
   const [photos, setPhotos] = useState({ front: initialFrontUrl, back: initialBackUrl })
+  const [processed, setProcessed] = useState({ front: initialFrontProcessedUrl, back: initialBackProcessedUrl })
+  const [processing, setProcessing] = useState(false)
   const [side, setSide] = useState<Side>(initialFrontUrl ? 'back' : 'front')
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -59,6 +64,33 @@ export function KitLensUploader({
     setCameraOpen(false)
   }
 
+  async function processSide(target: Side) {
+    setProcessing(true)
+    try {
+      const response = await fetch('/api/kit-lens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shirtId, side: target }),
+      })
+      const body = await response.json().catch(() => ({}))
+      if (!response.ok || typeof body.processed_url !== 'string') throw new Error('Processing failed')
+      setProcessed(current => ({ ...current, [target]: body.processed_url }))
+    } catch {
+      setError('O original está salvo. A remoção de fundo não foi concluída; você pode tentar novamente ou continuar.')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  async function retryBackground() {
+    if (!photos[side] || busyRef.current) return
+    busyRef.current = true
+    setSaving(true)
+    setError(null)
+    try { await processSide(side) }
+    finally { busyRef.current = false; setSaving(false) }
+  }
+
   async function savePhoto() {
     if (!file || busyRef.current) return
     busyRef.current = true
@@ -73,11 +105,13 @@ export function KitLensUploader({
       const { data: { publicUrl } } = supabase.storage.from('shirt-originals').getPublicUrl(path)
       const update = side === 'front'
         ? { original_url: publicUrl, processed_url: null, processing_status: 'none' }
-        : { back_original_url: publicUrl }
+        : { back_original_url: publicUrl, back_processed_url: null }
       const { data, error: saveError } = await supabase.from('shirts').update(update)
         .eq('id', shirtId).eq('user_id', userId).select('id').single()
       if (saveError || !data) throw new Error('A foto não foi vinculada à camiseta. Tente novamente.')
       setPhotos(current => ({ ...current, [side]: publicUrl }))
+      setProcessed(current => ({ ...current, [side]: null }))
+      await processSide(side)
       setFile(null)
       if (side === 'front' && !photos.back) setSide('back')
     } catch (cause) {
@@ -99,19 +133,19 @@ export function KitLensUploader({
     <section className="space-y-5" aria-label="Registro fotográfico da camiseta">
       <div>
         <p className="font-mono text-sm uppercase tracking-widest text-[#1a1a1a]">Registro da camiseta</p>
-        <p className="mt-2 font-mono text-sm leading-relaxed text-[#888]">Primeiro a frente, depois o verso. Fotografe a peça inteira, bem iluminada, com as mangas abertas. As fotos são preservadas sem remoção de fundo ou filtros.</p>
+        <p className="mt-2 font-mono text-sm leading-relaxed text-[#888]">Primeiro a frente, depois o verso. Fotografe a peça inteira, bem iluminada, com as mangas abertas. Guardamos os originais e criamos cópias sem fundo para exibição.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {(['front', 'back'] as const).map((item, index) => (
-          <button key={item} type="button" disabled={saving} onClick={() => selectSide(item)}
+          <button key={item} type="button" disabled={saving || (item === 'back' && !photos.front)} onClick={() => selectSide(item)}
             aria-pressed={side === item}
             className={'border p-3 text-left disabled:opacity-40 ' + (side === item ? 'border-[#1a1a1a]' : 'border-[#e0e0e0]')}>
             <span className="font-mono text-sm uppercase tracking-widest">{index + 1}. {item === 'front' ? 'Frente' : 'Verso'}</span>
             <span className="mt-2 block font-mono text-xs text-[#888]">{photos[item] ? 'Salva · toque para substituir' : 'Pendente'}</span>
             {photos[item] && (
               <div className="relative mt-3 aspect-[3/4] bg-[#f1f1f1]">
-                <Image src={photos[item]!} alt={item === 'front' ? 'Frente da camiseta' : 'Verso da camiseta'} fill sizes="(max-width: 640px) 45vw, 240px" className="object-contain p-2" unoptimized />
+                <Image src={(processed[item] || photos[item])!} alt={item === 'front' ? 'Frente da camiseta' : 'Verso da camiseta'} fill sizes="(max-width: 640px) 45vw, 240px" className="object-contain p-2" unoptimized />
               </div>
             )}
           </button>
@@ -122,7 +156,8 @@ export function KitLensUploader({
         {side === 'front' ? '1 de 2 · Frente da camiseta' : '2 de 2 · Verso da camiseta'}
       </p>
 
-      {!file && !cameraOpen && (
+      {processing && <p role="status" className="font-mono text-sm text-[#888]">Removendo o fundo de {label.toLowerCase()}...</p>}
+      {!file && !cameraOpen && !saving && (
         <div className="space-y-3">
           <button type="button" className={buttonClass + ' w-full'} onClick={() => { setError(null); setCameraOpen(true) }}>
             Tirar foto · {label}
@@ -152,7 +187,7 @@ export function KitLensUploader({
             </div>
           )}
           <div className="flex flex-wrap gap-3">
-            <button type="button" onClick={savePhoto} disabled={saving} className={buttonClass}>{saving ? 'Salvando...' : 'Confirmar ' + label.toLowerCase()}</button>
+            <button type="button" onClick={savePhoto} disabled={saving} className={buttonClass}>{processing ? 'Removendo fundo...' : saving ? 'Salvando...' : 'Confirmar ' + label.toLowerCase()}</button>
             <button type="button" disabled={saving} className={buttonClass} onClick={() => { setFile(null); setError(null) }}>Escolher outra foto</button>
           </div>
         </div>
@@ -164,6 +199,9 @@ export function KitLensUploader({
         if (selected) selectFile(selected)
       }} />
 
+      {photos[side] && !processed[side] && !file && !cameraOpen && (
+        <button type="button" disabled={saving} className={buttonClass} onClick={retryBackground}>Tentar remover fundo · {label}</button>
+      )}
       {error && <p role="alert" className="border border-red-200 p-3 font-mono text-sm text-red-600">{error}</p>}
       <p className="font-mono text-sm text-[#888]" role="status">
         {photos.front && photos.back ? 'Frente e verso salvos.' : photos.front ? 'Frente salva. Agora registre o verso.' : 'Registre a frente para começar.'}
