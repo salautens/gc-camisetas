@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -29,7 +29,12 @@ interface ShirtDetailPanelProps {
 }
 
 export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanelProps) {
-  const imageUrl = shirt ? (shirt.processed_url || shirt.original_url) : null
+  const [activeSide, setActiveSide] = useState<'front' | 'back'>('front')
+  const [showOriginal, setShowOriginal] = useState(false)
+  useEffect(() => { setActiveSide('front'); setShowOriginal(false) }, [shirt?.id])
+  const originalUrl = activeSide === 'front' ? shirt?.original_url : shirt?.back_original_url
+  const processedUrl = activeSide === 'front' ? shirt?.processed_url : shirt?.back_processed_url
+  const imageUrl = (showOriginal ? originalUrl : processedUrl || originalUrl) || null
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -73,11 +78,24 @@ export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanel
           {/* Title */}
           <div className="overflow-hidden mb-2">
             <h2 className="font-display font-light text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.9] tracking-[-0.02em] text-[#1a1a1a]">
-              {shirt.clube}
+              {shirt.clube || 'Camiseta'}
             </h2>
           </div>
           <p className="font-mono text-[1rem] tracking-[0.25em] uppercase text-[#888] mb-10">
             {shirt.temporada} — {VERSAO_LABEL[shirt.versao]}
+          </p>
+
+          <div className="mb-4 flex flex-wrap gap-3" aria-label="Lado da camiseta">
+            <button type="button" aria-pressed={activeSide === 'front'} onClick={() => setActiveSide('front')} className="min-h-11 border border-[#888] px-4 py-2 font-mono text-sm">Frente</button>
+            <button type="button" aria-pressed={activeSide === 'back'} onClick={() => setActiveSide('back')} className="min-h-11 border border-[#888] px-4 py-2 font-mono text-sm">Verso</button>
+            {originalUrl && processedUrl && (
+              <button type="button" aria-pressed={showOriginal} onClick={() => setShowOriginal(value => !value)} className="min-h-11 border border-[#888] px-4 py-2 font-mono text-sm">
+                {showOriginal ? 'Ver sem fundo' : 'Ver original'}
+              </button>
+            )}
+          </div>
+          <p className="mb-3 font-mono text-xs uppercase tracking-widest text-[#888]">
+            {activeSide === 'front' ? 'Frente' : 'Verso'} · {showOriginal || !processedUrl ? 'Original' : 'Sem fundo'}
           </p>
 
           {/* Image */}
@@ -85,7 +103,7 @@ export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanel
             {imageUrl ? (
               <Image
                 src={imageUrl}
-                alt={shirt.clube}
+                alt={(shirt.clube || 'Camiseta') + (activeSide === 'front' ? ' · Frente' : ' · Verso')}
                 fill
                 className="object-contain p-8"
                 sizes="(max-width: 640px) 100vw, 50vw"
@@ -93,10 +111,14 @@ export function ShirtDetailPanel({ shirt, onClose, onDeleted }: ShirtDetailPanel
               />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <span className="font-display text-[5rem] font-light text-black/10 tracking-[-0.04em]">GC</span>
+                <span className="font-mono text-sm text-[#888]">{activeSide === 'back' ? 'Verso ainda não registrado' : 'Frente ainda não registrada'}</span>
               </div>
             )}
           </div>
+
+          {originalUrl && (
+            <a href={originalUrl} target="_blank" rel="noopener noreferrer" className="mb-6 block font-mono text-sm underline">Abrir foto original · {activeSide === 'front' ? 'Frente' : 'Verso'}</a>
+          )}
 
           {/* Details */}
           <div className="space-y-0 border-t border-[#e0e0e0]">
