@@ -18,7 +18,6 @@ interface ShirtFormProps {
 export function ShirtForm({ userId }: ShirtFormProps) {
   const [clube, setClube] = useState('')
   const [temporada, setTemporada] = useState('')
-  const [liga, setLiga] = useState('')
   const [versao, setVersao] = useState<Shirt['versao']>('home')
   const [fabricante, setFabricante] = useState('')
   const [condicao, setCondicao] = useState<Shirt['condicao']>(null)
@@ -39,7 +38,6 @@ export function ShirtForm({ userId }: ShirtFormProps) {
       user_id: userId,
       clube: clube.trim(),
       temporada: temporada.trim(),
-      liga: liga.trim() || null,
       versao,
       fabricante: fabricante.trim() || null,
       condicao: condicao || null,
@@ -85,10 +83,6 @@ export function ShirtForm({ userId }: ShirtFormProps) {
                 <option value="goalkeeper">Goleiro</option>
                 <option value="special">Especial</option>
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="liga">Liga</Label>
-              <Input id="liga" value={liga} onChange={(e) => setLiga(e.target.value)} placeholder="Brasileirão, Champions..." />
             </div>
           </div>
 
