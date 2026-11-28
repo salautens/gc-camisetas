@@ -8,11 +8,32 @@ import { useRouter } from 'next/navigation'
 
 type Mode = 'login' | 'signup' | 'forgot'
 
+function PasswordToggle({ visible, onToggle, inputId }: { visible: boolean; onToggle: () => void; inputId: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
+      aria-controls={inputId}
+      aria-pressed={visible}
+      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded text-gray-500 hover:text-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+        <circle cx="12" cy="12" r="3" />
+        {visible && <path d="m3 3 18 18" />}
+      </svg>
+    </button>
+  )
+}
+
 export function AuthForm() {
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -97,34 +118,40 @@ export function AuthForm() {
           {mode !== 'forgot' && (
             <div>
               <Label htmlFor="password" className="text-white/40">Senha</Label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                minLength={6}
-                className="w-full bg-transparent border-b border-white/20 text-white placeholder-white/20 font-mono text-[0.7rem] tracking-[0.05em] py-2 px-0 focus:outline-none focus:border-white/60 transition-colors"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                  minLength={6}
+                  className="w-full bg-transparent border-b border-white/20 text-white placeholder-white/20 font-mono text-[0.7rem] tracking-[0.05em] py-2 pl-0 pr-11 focus:outline-none focus:border-white/60 transition-colors"
+                />
+                <PasswordToggle visible={showPassword} onToggle={() => setShowPassword(visible => !visible)} inputId="password" />
+              </div>
             </div>
           )}
 
           {mode === 'forgot' && (
             <div>
               <Label htmlFor="newPassword" className="text-white/40">Nova senha</Label>
-              <input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-                autoFocus
-                className="w-full bg-transparent border-b border-white/20 text-white placeholder-white/20 font-mono text-[0.7rem] tracking-[0.05em] py-2 px-0 focus:outline-none focus:border-white/60 transition-colors"
-              />
+              <div className="relative">
+                <input
+                  id="newPassword"
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  autoFocus
+                  className="w-full bg-transparent border-b border-white/20 text-white placeholder-white/20 font-mono text-[0.7rem] tracking-[0.05em] py-2 pl-0 pr-11 focus:outline-none focus:border-white/60 transition-colors"
+                />
+                <PasswordToggle visible={showNewPassword} onToggle={() => setShowNewPassword(visible => !visible)} inputId="newPassword" />
+              </div>
             </div>
           )}
 
