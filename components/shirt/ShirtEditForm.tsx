@@ -121,7 +121,7 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
       </div>
 
       <form onSubmit={handleSave} className="space-y-8">
-          <p className="font-mono text-[0.85rem] leading-relaxed text-[#888]">Preencha o que souber. Você pode deixar os detalhes em branco e completar depois. A versão começa como Titular e pode ser alterada.</p>
+          <p className="font-mono text-[0.85rem] leading-relaxed text-[#888]">Preencha o que souber. Você pode deixar os detalhes em branco e completar depois. A versão usa opções predefinidas.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
           <div>
             <Label htmlFor="clube">Clube</Label>
