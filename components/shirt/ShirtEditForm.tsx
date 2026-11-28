@@ -21,7 +21,6 @@ interface ShirtEditFormProps {
 export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
   const [clube, setClube] = useState(shirt.clube)
   const [temporada, setTemporada] = useState(shirt.temporada)
-  const [liga, setLiga] = useState(shirt.liga || '')
   const [versao, setVersao] = useState<Shirt['versao']>(shirt.versao)
   const [fabricante, setFabricante] = useState(shirt.fabricante || '')
   const [condicao, setCondicao] = useState<Shirt['condicao']>(shirt.condicao)
@@ -42,7 +41,6 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
     const { error } = await supabase.from('shirts').update({
       clube: clube.trim(),
       temporada: temporada.trim(),
-      liga: liga.trim() || null,
       versao,
       fabricante: fabricante.trim() || null,
       condicao: condicao || null,
@@ -143,10 +141,6 @@ export function ShirtEditForm({ shirt, userId }: ShirtEditFormProps) {
               <option value="goalkeeper">Goleiro</option>
               <option value="special">Especial</option>
             </Select>
-          </div>
-          <div>
-            <Label htmlFor="liga">Liga</Label>
-            <Input id="liga" value={liga} onChange={(e) => setLiga(e.target.value)} placeholder="Brasileirão, Champions..." />
           </div>
         </div>
 
