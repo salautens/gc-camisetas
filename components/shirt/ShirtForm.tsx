@@ -31,10 +31,6 @@ export function ShirtForm({ userId }: ShirtFormProps) {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (!clube.trim() || !temporada.trim()) {
-      setError('Clube e temporada são obrigatórios')
-      return
-    }
 
     setLoading(true)
     setError(null)
@@ -69,12 +65,12 @@ export function ShirtForm({ userId }: ShirtFormProps) {
         <form onSubmit={handleSave} className="space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
             <div>
-              <Label htmlFor="clube">Clube *</Label>
-              <Input id="clube" value={clube} onChange={(e) => setClube(e.target.value)} placeholder="Flamengo" required />
+              <Label htmlFor="clube">Clube (opcional)</Label>
+              <Input id="clube" value={clube} onChange={(e) => setClube(e.target.value)} placeholder="Flamengo" />
             </div>
             <div>
-              <Label htmlFor="temporada">Temporada *</Label>
-              <Input id="temporada" value={temporada} onChange={(e) => setTemporada(e.target.value)} placeholder="2002–03" required />
+              <Label htmlFor="temporada">Temporada (opcional)</Label>
+              <Input id="temporada" value={temporada} onChange={(e) => setTemporada(e.target.value)} placeholder="2002–03" />
             </div>
           </div>
 
