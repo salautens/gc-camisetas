@@ -63,13 +63,14 @@ export function ShirtForm({ userId }: ShirtFormProps) {
 
       {!shirtId ? (
         <form onSubmit={handleSave} className="space-y-8">
+          <p className="font-mono text-[0.85rem] leading-relaxed text-[#888]">Preencha o que souber. Você pode deixar os detalhes em branco e completar depois. A versão começa como Titular e pode ser alterada.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
             <div>
-              <Label htmlFor="clube">Clube (opcional)</Label>
+              <Label htmlFor="clube">Clube</Label>
               <Input id="clube" value={clube} onChange={(e) => setClube(e.target.value)} placeholder="Flamengo" />
             </div>
             <div>
-              <Label htmlFor="temporada">Temporada (opcional)</Label>
+              <Label htmlFor="temporada">Temporada</Label>
               <Input id="temporada" value={temporada} onChange={(e) => setTemporada(e.target.value)} placeholder="2002–03" />
             </div>
           </div>
@@ -99,7 +100,7 @@ export function ShirtForm({ userId }: ShirtFormProps) {
             <div>
               <Label htmlFor="condicao">Condição</Label>
               <Select id="condicao" value={condicao || ''} onChange={(e) => setCondicao(e.target.value as Shirt['condicao'] || null)}>
-                <option value="">—</option>
+                <option value="">Não informada</option>
                 <option value="nova">Nova</option>
                 <option value="boa">Boa condição</option>
                 <option value="usada">Usada</option>
