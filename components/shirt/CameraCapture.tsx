@@ -53,7 +53,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
     }
 
     function handleVisibility() {
-      if (document.hidden) {
+      if (document.hidden && streamRef.current) {
         cancelled = true
         stopCamera()
         onClose()
@@ -92,15 +92,31 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
     <section aria-label="Câmera" className="space-y-4 border border-[#e0e0e0] p-4">
       <p className="font-mono text-sm text-[#888]">Enquadre a camiseta e toque em Tirar foto.</p>
       {!error && (
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          onLoadedData={() => setReady(true)}
-          aria-label="Prévia da câmera"
-          className="w-full max-h-[60vh] bg-black object-contain"
-        />
+        <div className="relative overflow-hidden bg-black">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            onLoadedData={() => setReady(true)}
+            aria-label="Prévia da câmera"
+            className="block w-full max-h-[60vh] object-contain"
+          />
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6" aria-hidden="true">
+            <svg viewBox="0 0 300 340" className="h-full max-h-full w-full max-w-full text-gray-300 opacity-70" fill="none">
+              <path
+                d="M105 40 65 55 15 110 58 153 82 130 82 300 218 300 218 130 242 153 285 110 235 55 195 40 C190 69 110 69 105 40Z"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeDasharray="10 7"
+                strokeLinejoin="round"
+                fill="currentColor"
+                fillOpacity="0.06"
+              />
+            </svg>
+          </div>
+          <p className="pointer-events-none absolute bottom-3 left-0 right-0 text-center font-mono text-xs text-gray-200">Alinhe a camiseta com a silhueta</p>
+        </div>
       )}
       {error && <p role="alert" className="font-mono text-sm text-red-600">{error}</p>}
       <div className="flex flex-wrap gap-3">
