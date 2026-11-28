@@ -119,13 +119,13 @@ export function ShirtForm({ userId }: ShirtFormProps) {
           )}
 
           <Button type="submit" loading={loading}>
-            Salvar e adicionar foto →
+            Salvar e fotografar →
           </Button>
         </form>
       ) : (
         <div>
           <p className="font-mono text-[1rem] tracking-[0.2em] uppercase text-[#888] mb-8">
-            Kit salvo. Adicione uma foto.
+            Kit salvo. Registre a frente e depois o verso.
           </p>
 
           <KitLensUploader
